@@ -4,7 +4,7 @@ import 'font-awesome/css/font-awesome.min.css';
 const GoogleConnectButton = () => {
   const handleConnect = () => {
     // Redirect the user to the backend to initiate the Google OAuth flow
-    window.location.href = "http://127.0.0.1:8000/google/connect";
+    window.location.href = "https://crm-backend.yorkhospitality.ca/google/connect";
   };
 
   return (
