@@ -124,8 +124,8 @@ const Login = () => {
 
                 {/* Register Link */}
                 <div className="mt-6 text-center text-sm text-gray-600">
-                    <span>Don't have an account?</span>
-                    <Link
+                <span>Don&apos;t have an account?</span>
+                <Link
                         href="/register"
                         className="text-indigo-600 hover:text-indigo-700 ml-1"
                     >

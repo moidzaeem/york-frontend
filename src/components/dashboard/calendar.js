@@ -67,8 +67,8 @@ const Calendar = ({ reloadDashboardData }) => {
                 <div className="grid grid-cols-7 gap-3 mt-4">
                     {
                         days.length && days.map((day, idx) => (
-                            <Link href="/calendar">
-                            <span key={idx} className="flex items-center justify-center">
+                            <Link  key={idx} href="/calendar">
+                            <span className="flex items-center justify-center">
                                 <span 
                                     className={`
                                         text-center text-sm font-semibold w-9 p-2 px-4 aspect-square rounded-full flex items-center justify-center
