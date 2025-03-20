@@ -19,25 +19,34 @@ import { useFetchResource } from '@/hooks/fetchResource';
 import Link from 'next/link';
 import { useAccessControl } from '@/hooks/accessControl';
 import { useRouter } from 'next/navigation';
+import ReactSelect from 'react-select';
 
 
 const Page = ({ params }) => {
-    
-    const {isSubmitted, submitData} = useSubmitData('/api/tasks/update');
-    const {dropdowns} = useFetchDropdownData("/api/dropdowns/task");
+
+    const { isSubmitted, submitData } = useSubmitData('/api/tasks/update');
+    const { dropdowns } = useFetchDropdownData("/api/dropdowns/task");
     const router = useRouter();
-    const {permissions, can} = useAccessControl();
+    const { permissions, can } = useAccessControl();
 
     if (!can(["Tasks - View", "Tasks - Edit"])) {
         // navigate to 403 page.
         // router.push(process.env.NEXT_PUBLIC_UNAUTHORIZED_ROUTE);
     }
 
+    const userOptions = dropdowns?.users.map(user => ({
+        value: user.id,
+        label: user.name
+    })) || [];
+
+
     const { initialData } = useFetchResource("/api/tasks", params.id);
 
     const formik = useFormik({
-        initialValues: initialData,
-        enableReinitialize: true,
+        initialValues: {
+            ...initialData,
+            assigned_to: initialData.users ? initialData.users : [], // Parse comma-separated string to array
+        }, enableReinitialize: true,
         validationSchema: Yup.object({
             title: Yup.string()
                 .min(3, "Must be 3 characters or more")
@@ -58,9 +67,7 @@ const Page = ({ params }) => {
             category_id: Yup.number()
                 .required('Required')
                 .integer("Must be valid category"),
-            assigned_to: Yup.number()
-                .required('Required')
-                .integer("Must be valid user"),
+            assigned_to: Yup.array().min(1, 'Atleast one assigne is required').required('required'),
             priority: Yup.string()
                 .required('Required'),
             notes: Yup.string()
@@ -69,6 +76,12 @@ const Page = ({ params }) => {
         }),
         onSubmit: submitData
     });
+
+    const handleSelectChange = (selectedOptions) => {
+        const selectedValues = selectedOptions.map(option => option.value);
+        formik.setFieldValue('assigned_to', selectedValues);
+    };
+
 
     const breadcrumb = (
         <ul className="flex items-center justify-start gap-3">
@@ -91,7 +104,7 @@ const Page = ({ params }) => {
             <title>YORK - Tasks</title>
 
             <Card className="h-auto min-h-96 md:rounded-[15px] bg-transparent md:bg-white px-0 md:px-4 dark:bg-transparent md:dark:bg-gray-800" >
-                { breadcrumb }
+                {breadcrumb}
                 <div className="w-full flex flex-row gap-3 items-center justify-between px-4 my-8">
                     <div className="flex items-center justify-start gap-3 text-xl md:text-xl font-semibold">
                         <span className="size-[31px] rounded-full bg-[#f5f5f5] dark:bg-gray-900 inline-flex items-center justify-center">
@@ -102,7 +115,7 @@ const Page = ({ params }) => {
                 </div>
 
                 <div className="w-full px-4 mt-12">
-                    <form onSubmit={ can("Tasks - Edit") ? formik.handleSubmit : () => false }>
+                    <form onSubmit={can("Tasks - Edit") ? formik.handleSubmit : () => false}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-11 gap-y-6">
                             {/* Form Group start */}
                             <div className="">
@@ -115,7 +128,7 @@ const Page = ({ params }) => {
                                     id="title"
                                     type="text"
                                     name="title"
-                                    value={ formik.values.title }
+                                    value={formik.values.title}
                                     placeholder="Task Title"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -124,7 +137,7 @@ const Page = ({ params }) => {
                                 />
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="client_id">
@@ -135,7 +148,7 @@ const Page = ({ params }) => {
                                 <Select
                                     id="client_id"
                                     name="client_id"
-                                    value={ formik.values.client_id }
+                                    value={formik.values.client_id}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -143,12 +156,12 @@ const Page = ({ params }) => {
                                     <option value="_">select client</option>
                                     {
                                         dropdowns?.clients?.length ? dropdowns.clients.map(client => (
-                                            <option key={ client.id } value={ client.id }>{ client.name }</option>
+                                            <option key={client.id} value={client.id}>{client.name}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">clients not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">clients not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
@@ -165,14 +178,14 @@ const Page = ({ params }) => {
                                     id="start_date"
                                     type="date"
                                     name="start_date"
-                                    value={ formik.values.start_date }
+                                    value={formik.values.start_date}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="end_date">
@@ -184,14 +197,14 @@ const Page = ({ params }) => {
                                     id="end_date"
                                     type="date"
                                     name="end_date"
-                                    value={ formik.values.end_date }
+                                    value={formik.values.end_date}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="status">
@@ -202,7 +215,7 @@ const Page = ({ params }) => {
                                 <Select
                                     id="status"
                                     name="status"
-                                    value={ formik.values.status }
+                                    value={formik.values.status}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -210,17 +223,17 @@ const Page = ({ params }) => {
                                     <option value="_">select status</option>
                                     {
                                         dropdowns?.statuses?.length ? dropdowns.statuses.map(status => (
-                                            <option key={ status } value={ status }>{ status }</option>
+                                            <option key={status} value={status}>{status}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">statuses not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">statuses not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="department_id">
@@ -231,7 +244,7 @@ const Page = ({ params }) => {
                                 <Select
                                     id="department_id"
                                     name="department_id"
-                                    value={ formik.values.department_id }
+                                    value={formik.values.department_id}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -239,17 +252,17 @@ const Page = ({ params }) => {
                                     <option value="_">select department</option>
                                     {
                                         dropdowns?.departments?.length ? dropdowns.departments.map(department => (
-                                            <option key={ department.id } value={ department.id }>{ department.name }</option>
+                                            <option key={department.id} value={department.id}>{department.name}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">departments not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">departments not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="category_id">
@@ -260,7 +273,7 @@ const Page = ({ params }) => {
                                 <Select
                                     id="category_id"
                                     name="category_id"
-                                    value={ formik.values.category_id }
+                                    value={formik.values.category_id}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -268,17 +281,17 @@ const Page = ({ params }) => {
                                     <option value="_">select category</option>
                                     {
                                         dropdowns?.categories?.length ? dropdowns.categories.map(category => (
-                                            <option key={ category.id } value={ category.id }>{ category.title }</option>
+                                            <option key={category.id} value={category.id}>{category.title}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">categories not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">categories not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="assigned_to">
@@ -286,28 +299,23 @@ const Page = ({ params }) => {
                                     <InputError message={formik.touched.assigned_to && formik.errors.assigned_to ? formik.errors.assigned_to : ''} />
                                 </Label>
 
-                                <Select
+                                <ReactSelect
                                     id="assigned_to"
                                     name="assigned_to"
-                                    value={ formik.values.assigned_to }
-                                    className="block mt-1 w-full bg-[#f5f5f5]"
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                >
-                                    <option value="_">select assignee</option>
-                                    {
-                                        dropdowns?.users?.length ? dropdowns.users.map(assignee => (
-                                            <option key={ assignee.id } value={ assignee.id }>{ assignee.name }</option>
-                                        ))
-                                        :
-                                        (
-                                            <option value="_">assignees not found</option>
-                                        )
-                                    }
-                                </Select>
+                                    value={userOptions.filter(option => formik.values.assigned_to.includes(option.value))}
+                                    onChange={handleSelectChange}
+                                    options={userOptions}
+                                    isMulti
+                                    closeMenuOnSelect={false}
+                                    className="mt-2"
+                                    placeholder="Select assignees"
+                                />
+
+
+
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="priority">
@@ -318,7 +326,7 @@ const Page = ({ params }) => {
                                 <Select
                                     id="priority"
                                     name="priority"
-                                    value={ formik.values.priority }
+                                    value={formik.values.priority}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -326,12 +334,12 @@ const Page = ({ params }) => {
                                     <option value="_">select priority</option>
                                     {
                                         dropdowns?.priorities?.length ? dropdowns.priorities.map(priority => (
-                                            <option key={ priority } value={ priority }>{ priority }</option>
+                                            <option key={priority} value={priority}>{priority}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">priorities not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">priorities not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
@@ -348,7 +356,7 @@ const Page = ({ params }) => {
                                     id="notes"
                                     rows="8"
                                     name="notes"
-                                    value={ formik.values.notes }
+                                    value={formik.values.notes}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -358,10 +366,10 @@ const Page = ({ params }) => {
                         </div>
 
                         {
-                            can("Tasks - Edit") ?
+                            // can("Tasks - Edit") ?
                                 <FormAction backUrl="/tasks" isSubmitted={isSubmitted} />
-                                :
-                                ""
+                                // :
+                                // ""
                         }
                     </form>
                 </div>

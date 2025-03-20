@@ -10,16 +10,18 @@ import Sun from '@/components/icons/Sun'
 import SunCloud from '@/components/icons/SunCloud'
 import { useFetchDropdownData } from '@/hooks/fetchDropdownData'
 import axios from '@/lib/axios'
-
+import GoogleConnectButton from '@/components/GoogleConnect'
+import { useContext } from 'react';
+import AuthContext from '@/lib/authContext';
 
 // export const metadata = {
 //     title: 'XFUSE - Dashboard',
 // }
 
 const Dashboard = () => {
-    
-    const { dropdowns: stats, setDropdowns: setStats } = useFetchDropdownData("/api/dashboard");
 
+    const { dropdowns: stats, setDropdowns: setStats } = useFetchDropdownData("/api/dashboard");
+    let user = useContext(AuthContext);
 
     const loadDashboardData = async (month) => {
 
@@ -27,7 +29,7 @@ const Dashboard = () => {
             const response = await axios.get("/api/dashboard", {
                 params: { month }
             });
-            
+
             setStats(prev => {
                 return {
                     ...response.data
@@ -39,18 +41,31 @@ const Dashboard = () => {
         }
     }
 
+    const containerStyle = {
+        marginTop: '20px', // Add top margin to space out the button
+        display: 'flex',   // Use flexbox to center the content
+        justifyContent: 'center', // Center horizontally
+        alignItems: 'center', // Center vertically if you want it in a container with more height
+    };
+
+
     return (
         <>
             <title>YORK - Dashboard</title>
-            
+
 
             <div className="grid grid-cols-12 gap-4 2xl:gap-8">
                 <div className="w-full col-span-12 lg:col-span-8 bg-transparent">
+                    {!user?.google_access_token && (
+                        <div style={containerStyle}>
+                            <GoogleConnectButton />
+                        </div>
+                    )}
 
-                    <div className="w-full h-auto grid grid-cols-1 lg:grid-cols-3 gap-4 2xl:gap-8 mb-4 2xl:mb-8">
-                        <Stat title="Tasks 📋" shortDescription="total number of tasks" count={ stats?.total_tasks ?? 0 } path="/tasks" />
-                        <Stat title="Clients 🤝" shortDescription="total number of clients" count={ stats?.total_clients ?? 0 } path="/projects/clients" />
-                        <Stat title="Tender 🎯" shortDescription="total number of tenders" count={ stats?.total_tenders ?? 0 } path="/tenders" />
+                    <div className="mt-3 w-full h-auto grid grid-cols-1 lg:grid-cols-3 gap-4 2xl:gap-8 mb-4 2xl:mb-8">
+                        <Stat title="Tasks 📋" shortDescription="total number of tasks" count={stats?.total_tasks ?? 0} path="/tasks" />
+                        <Stat title="Clients 🤝" shortDescription="total number of clients" count={stats?.total_clients ?? 0} path="/projects/clients" />
+                        <Stat title="Tender 🎯" shortDescription="total number of tenders" count={stats?.total_tenders ?? 0} path="/tenders" />
                     </div>
 
                     <div className="w-full h-auto grid grid-cols-1 gap-4 2xl:gap-8 my-4 2xl:my-8">
@@ -62,28 +77,28 @@ const Dashboard = () => {
                     <div className="w-full h-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 2xl:gap-8 my-4 2xl:my-8">
 
                         {
-                            stats?.weather?.brantford && <WeatherStat city_name={ stats.weather.brantford.title } condition={ stats.weather.brantford.label } temp={ stats.weather.brantford.temp }  />
+                            stats?.weather?.brantford && <WeatherStat city_name={stats.weather.brantford.title} condition={stats.weather.brantford.label} temp={stats.weather.brantford.temp} />
                         }
 
                         {
-                            stats?.weather?.north_york && <WeatherStat city_name={ stats.weather.north_york.title } condition={ stats.weather.north_york.label } temp={ stats.weather.north_york.temp } />                            
+                            stats?.weather?.north_york && <WeatherStat city_name={stats.weather.north_york.title} condition={stats.weather.north_york.label} temp={stats.weather.north_york.temp} />
                         }
 
                     </div>
 
                     <div className="w-full h-auto mt-4 2xl:mt-8">
-                        
-                        <TodayTasks see_all="/tasks" tasks={ stats?.today_tasks } />
+
+                        <TodayTasks see_all="/tasks" tasks={stats?.today_tasks} />
 
                     </div>
                 </div>
 
                 <div className="w-full col-span-12 lg:col-span-4 bg-transparent justify-self-stretch">
                     <div className="w-full h-max grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 2xl:gap-8">
-                        
-                        <Calendar reloadDashboardData={ loadDashboardData } />
 
-                        <BirthDays birth_days={ stats?.birthdays } see_all="#" />
+                        <Calendar reloadDashboardData={loadDashboardData} />
+
+                        <BirthDays birth_days={stats?.birthdays} see_all="#" />
 
                     </div>
                 </div>

@@ -15,20 +15,33 @@ import { useFetchResource } from '@/hooks/fetchResource';
 import Loading from '@/app/(app)/Loading';
 import { useRouter } from 'next/navigation';
 import { useAccessControl } from '@/hooks/accessControl';
+import DeleteConfirmationModal from '@/components/modal/deleteConfirm';
+import ReactSelect from 'react-select';
 
 const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
 
-    const {isSubmitted, submitData} = useSubmitData('/api/events/update');
-    const {dropdowns} = useFetchDropdownData("/api/dropdowns/event");
+    const { isSubmitted, submitData } = useSubmitData('/api/events/update');
+    const { dropdowns } = useFetchDropdownData("/api/dropdowns/event");
     const router = useRouter();
-    const {permissions, can} = useAccessControl();
-    
+    const { permissions, can } = useAccessControl();
+    const [isDeletionModalVisible, setIsDeletionModalVisible] = useState(false);
+
+    const userOptions = dropdowns?.users.map(user => ({
+        value: user.id,
+        label: user.name
+    })) || [];
 
     const { initialData } = useFetchResource("/api/events", eventID);
 
+    const closeDeletionModal = () => {
+        setIsDeletionModalVisible(false);
+    };
+
     const formik = useFormik({
-        initialValues: initialData,
-        enableReinitialize: true,
+        initialValues: {
+            ...initialData,
+            assigned_to: initialData.users ? initialData.users : [], // Parse comma-separated string to array
+        }, enableReinitialize: true,
         validationSchema: Yup.object({
             event_name: Yup.string()
                 .min(3, "Must be 3 characters or more")
@@ -56,6 +69,16 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
 
     if (!isVisible) return null;
 
+    // Handle Delete Event Function
+    const handleDeleteEvent = () => {
+        setIsDeletionModalVisible(true);
+    };
+
+    const handleSelectChange = (selectedOptions) => {
+        const selectedValues = selectedOptions.map(option => option.value);
+        formik.setFieldValue('assigned_to', selectedValues);
+    };
+
     return (
         <div className="fixed inset-0  overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border max-w-[1080px] shadow-xl rounded-2xl shadow-teal-200 bg-white">
@@ -69,7 +92,7 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                 </div>
 
                 <div className="w-full px-4 mt-12">
-                    <form onSubmit={ can("Events - Create") ? formik.handleSubmit : () => false}>
+                    <form onSubmit={can("Events - Create") ? formik.handleSubmit : () => false}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-11 gap-y-6">
                             {/* Form Group start */}
                             <div className="">
@@ -82,7 +105,7 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                     id="event_name"
                                     type="text"
                                     name="event_name"
-                                    value={ formik.values.event_name }
+                                    value={formik.values.event_name}
                                     placeholder="Event Name"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -91,7 +114,7 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                 />
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="client_id">
@@ -102,7 +125,7 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                 <Select
                                     id="client_id"
                                     name="client_id"
-                                    value={ formik.values.client_id }
+                                    value={formik.values.client_id}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -110,17 +133,17 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                     <option value="_">select client</option>
                                     {
                                         dropdowns?.clients?.length ? dropdowns.clients.map(client => (
-                                            <option key={ client.id } value={ client.id }>{ client.name }</option>
+                                            <option key={client.id} value={client.id}>{client.name}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">clients not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">clients not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="assigned_to">
@@ -128,28 +151,22 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                     <InputError message={formik.touched.assigned_to && formik.errors.assigned_to ? formik.errors.assigned_to : ''} />
                                 </Label>
 
-                                <Select
+                                <ReactSelect
                                     id="assigned_to"
                                     name="assigned_to"
-                                    value={ formik.values.assigned_to }
-                                    className="block mt-1 w-full bg-[#f5f5f5]"
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                >
-                                    <option value="_">select assignee</option>
-                                    {
-                                        dropdowns?.users?.length ? dropdowns.users.map(assignee => (
-                                            <option key={ assignee.id } value={ assignee.id }>{ assignee.name }</option>
-                                        ))
-                                        :
-                                        (
-                                            <option value="_">assignees not found</option>
-                                        )
-                                    }
-                                </Select>
+                                    value={userOptions.filter(option => formik.values.assigned_to.includes(option.value))}
+                                    onChange={handleSelectChange}
+                                    options={userOptions}
+                                    isMulti
+                                    closeMenuOnSelect={false}
+                                    className="mt-2"
+                                    placeholder="Select assignees"
+                                />
+
+
+
                             </div>
                             {/* Form Group end */}
-
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="due_date">
@@ -161,14 +178,14 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                     id="due_date"
                                     type="datetime-local"
                                     name="due_date"
-                                    value={ formik.values.due_date }
+                                    value={formik.values.due_date}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="department_id">
@@ -179,7 +196,7 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                 <Select
                                     id="department_id"
                                     name="department_id"
-                                    value={ formik.values.department_id }
+                                    value={formik.values.department_id}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -187,17 +204,17 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                     <option value="_">select department</option>
                                     {
                                         dropdowns?.departments?.length ? dropdowns.departments.map(department => (
-                                            <option key={ department.id } value={ department.id }>{ department.name }</option>
+                                            <option key={department.id} value={department.id}>{department.name}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">departments not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">departments not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="">
                                 <Label htmlFor="status">
@@ -208,7 +225,7 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                 <Select
                                     id="status"
                                     name="status"
-                                    value={ formik.values.status }
+                                    value={formik.values.status}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -216,12 +233,12 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                     <option value="_">select status</option>
                                     {
                                         dropdowns?.statuses?.length ? dropdowns.statuses.map(status => (
-                                            <option key={ status } value={ status }>{ status }</option>
+                                            <option key={status} value={status}>{status}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">statuses not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">statuses not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
@@ -238,7 +255,7 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                                     id="notes"
                                     rows="8"
                                     name="notes"
-                                    value={ formik.values.notes }
+                                    value={formik.values.notes}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -248,16 +265,38 @@ const UpdateEventModal = ({ isVisible, eventID, onClose, datatableRef }) => {
                         </div>
 
                         {
-                            can("Events - Create") ? 
-                                <FormAction onClose={onClose} isSubmitted={isSubmitted} />
-                                :
-                                ""
+                            can("Events - Create") ? (
+                                <>
+                                    <FormAction onClose={onClose} isSubmitted={isSubmitted} />
+
+                                    {/* Delete Event Button */}
+                                    <div className="mt-6 flex justify-between items-center">
+                                        <button
+                                            onClick={handleDeleteEvent}
+                                            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                                        >
+                                            Delete Event
+                                        </button>
+                                    </div>
+                                </>
+                            ) : ""
                         }
+
                     </form>
+
+
                 </div>
             </div>
+            <DeleteConfirmationModal
+                isVisible={isDeletionModalVisible}
+                resourceID={eventID}
+                remoteEndPoint='/api/events/delete'
+                onClose={closeDeletionModal}
+            />
         </div>
     );
 };
+
+
 
 export default UpdateEventModal;

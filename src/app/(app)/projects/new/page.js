@@ -17,6 +17,7 @@ import Camera from '@/components/icons/Camera';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAccessControl } from '@/hooks/accessControl';
+import ReactSelect from 'react-select';
 
 
 const Page = () => {
@@ -26,9 +27,15 @@ const Page = () => {
     const router = useRouter();
     const {permissions, can} = useAccessControl();
 
+    const userOptions = dropdowns?.users.map(user => ({
+        value: user.id,
+        label: user.name
+    })) || [];
+
+
     if (!can("Projects - Create")) {
         // navigate to 403 page.
-        router.push(process.env.NEXT_PUBLIC_UNAUTHORIZED_ROUTE);
+        // router.push(process.env.NEXT_PUBLIC_UNAUTHORIZED_ROUTE);
     }
 
     const SUPPORTED_FORMATS = [
@@ -54,7 +61,8 @@ const Page = () => {
             start_date: "",
             end_date: "",
             notes: "",
-            files: []
+            files: [],
+            assigned_to: [],
         },
         validationSchema: Yup.object({
             project_name: Yup.string()
@@ -79,6 +87,8 @@ const Page = () => {
             notes: Yup.string()
                 .nullable()
                 .max(10000, 'Notes are too long'),
+                            assigned_to: Yup.array().min(1, 'Atleast one assigne is required').required('required'),
+                
             files: Yup.array()
                 .of(
                     Yup.mixed()
@@ -96,6 +106,12 @@ const Page = () => {
         }),
         onSubmit: submitData
     });
+
+    const handleSelectChange = (selectedOptions) => {
+        const selectedValues = selectedOptions.map(option => option.value);
+        formik.setFieldValue('assigned_to', selectedValues);
+    };
+
 
     const breadcrumb = (
         <ul className="flex items-center justify-start gap-3">
@@ -240,6 +256,30 @@ const Page = () => {
                                         )
                                     }
                                 </Select>
+                            </div>
+                            {/* Form Group end */}
+
+                             {/* Form Group start */}
+                             <div className="">
+                                <Label htmlFor="assigned_to">
+                                    Assignee
+                                    <InputError message={formik.touched.assigned_to && formik.errors.assigned_to ? formik.errors.assigned_to : ''} />
+                                </Label>
+
+                                <ReactSelect
+                                    id="assigned_to"
+                                    name="assigned_to"
+                                    value={userOptions.filter(option => formik.values.assigned_to.includes(option.value))}
+                                    onChange={handleSelectChange}
+                                    options={userOptions}
+                                    isMulti
+                                    closeMenuOnSelect={false}
+                                    className="mt-2"
+                                    placeholder="Select assignees"
+                                />
+
+
+
                             </div>
                             {/* Form Group end */}
 

@@ -33,7 +33,7 @@ const Page = () => {
 
     if (!can("Events - Create")) {
         // navigate to 403 page.
-        router.push(process.env.NEXT_PUBLIC_UNAUTHORIZED_ROUTE);
+        // router.push(process.env.NEXT_PUBLIC_UNAUTHORIZED_ROUTE);
     }
 
     const formik = useFormik({

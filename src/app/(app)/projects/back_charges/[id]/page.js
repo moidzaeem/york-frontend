@@ -17,7 +17,9 @@ import SidebarProjects from '@/components/icons/SidebarProjects';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAccessControl } from '@/hooks/accessControl';
-
+import { useShowOrDownload } from '@/hooks/showOrDownload';
+import BaseButton from '@/components/buttons/BaseButton';
+import Download from '@/components/icons/Download';
 
 const Page = ({ params }) => {
     
@@ -25,6 +27,7 @@ const Page = ({ params }) => {
     const {dropdowns} = useFetchDropdownData("/api/dropdowns/back_charge");
     const router = useRouter();
     const {permissions, can} = useAccessControl();
+    const [exportToExcel, loadingStatus] = useShowOrDownload();
 
     if (!can(["BackCharges - View", "BackCharges - Edit"])) {
         // navigate to 403 page.
@@ -102,6 +105,10 @@ const Page = ({ params }) => {
                         </span>
                         Edit Back Charge
                     </div>
+                    <BaseButton onClick={async () => { await exportToExcel("BackCharges", true, params.id) }} className="bg-white md:bg-[#f5f5f5] text-base md:text-base" >
+                        <Download className="fill-slate-500" />
+                        Download
+                    </BaseButton>
                 </div>
 
                 <div className="w-full px-4 mt-12">

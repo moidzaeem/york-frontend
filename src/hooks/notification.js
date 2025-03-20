@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation'
 export const useNotification = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
 
-    const { data: notifications, error } = useSWR('/api/notifications', () => {
+    const { data: notifications, error,unread } = useSWR('/api/notifications', () => {
         return axios
             .get('/api/notifications')
-            .then(res => res.data.data)
+            .then(res => res.data)
             .catch(error => {
                 console.log(error);
 
@@ -31,5 +31,6 @@ export const useNotification = ({ middleware, redirectIfAuthenticated } = {}) =>
 
     return {
         notifications,
+        unread
     }
 }

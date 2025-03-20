@@ -1,6 +1,5 @@
 'use client'
 
-import { useRef, useState } from 'react';
 import DataTable from '@/components/table/DataTable';
 import Card from '@/components/card/Card';
 import Plus from '@/components/icons/Plus';
@@ -8,9 +7,9 @@ import BaseLink from '@/components/buttons/BaseLink';
 import SimpleIconButton from '@/components/buttons/SimpleIconButton';
 import ButtonGroupH from '@/components/buttons/ButtonGroupH';
 import SimpleIconLink from '@/components/buttons/SimpleIconLink';
-import SidebarHr from '@/components/icons/SidebarHr';
-import Image from 'next/image';
+import SidebarExtras from '@/components/icons/SidebarExtras';
 import DeleteConfirmationModal from '@/components/modal/deleteConfirm';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAccessControl } from '@/hooks/accessControl';
@@ -25,7 +24,7 @@ const Page = () => {
     const router = useRouter();
     const {permissions, can} = useAccessControl();
 
-    if (!can(["Employees - View", "Employees - Create", "Employees - Edit", "Employees - Delete"])) {
+    if (!can(["Departments - View", "Departments - Create", "Departments - Edit", "Departments - Delete"])) {
         // navigate to 403 page.
         // router.push(process.env.NEXT_PUBLIC_UNAUTHORIZED_ROUTE);
     }
@@ -35,25 +34,23 @@ const Page = () => {
     };
 
 
-    const handleDeletionPopup = (employeeID) => {
-        setResourceID(employeeID);
+    const handleDeletionPopup = (departmentID) => {
+        setResourceID(departmentID);
         setIsModalVisible(true);
     }
 
 
     const actionButtons = (
         <>
-
             {
-                can("Employees - Create") ? 
-                    <BaseLink href="/hr/employees/new" className="bg-white md:bg-[#f5f5f5] text-base md:text-base" >
+                can("Departments - Create") ? 
+                    <BaseLink href="/extras/settings/positions/new" className="bg-white md:bg-[#f5f5f5] text-base md:text-base" >
                         <Plus className="fill-slate-500" />
-                        New Employee
+                        New Position
                     </BaseLink>
                     :
                     ""
             }
-
         </>
     );
 
@@ -64,58 +61,33 @@ const Page = () => {
             </li>
             <li >&gt;</li>
             <li className="capitalize text-base text-gray-500 font-bold">
-                Employees
+                Positions
             </li>
         </ul>
     )
 
     const tableConfig = {
-        remoteURL: "/api/employees",
+        remoteURL: "/api/positions",
         title: <div className="flex items-center justify-start gap-3 text-xl md:text-xl font-semibold">
                     <span className="size-[31px] rounded-full bg-[#f5f5f5] dark:bg-gray-900 inline-flex items-center justify-center">
-                        <SidebarHr size="size-[23px] md:size-[23px]" className="stroke-slate-800 dark:stroke-slate-300" />
+                        <SidebarExtras size="size-[23px] md:size-[23px]" className="stroke-slate-800 dark:stroke-slate-300" />
                     </span>
-                    Employees
+                    Positions
                 </div>,
         tableFluid: false,
         actionButtons: actionButtons,
         tableWrapperClass: "pb-4 rounded-[15px] 2xl:rounded-[30px]",
+        search: false,
         breadcrumb: breadcrumb,
 
         columns: [
             {
                 label: "ID",
-                key: "id",
+                key: "id"
             },
             {
-                label: "Name",
-                key: "name",
-                field: "profile.name",
-            },
-            {
-                label: "Position",
-                key: "position",
-                field: "position.title"
-            },
-            {
-                label: "Department",
-                key: "department",
-                field: "department.name"
-            },
-            {
-                label: "Phone No.",
-                key: "phone_number",
-                field: "profile.phone_number",
-            },
-            {
-                label: "Email",
-                key: "email",
-                field: "profile.email",
-            },
-            {
-                label: "Employment Type",
-                key: "employment_type",
-                field: "employment_type",
+                label: "Position Name",
+                key: "title"
             },
             {
                 label: "Action",
@@ -124,8 +96,8 @@ const Page = () => {
                     return <ButtonGroupH>
 
                         {
-                            can("Employees - Edit") ? 
-                                <SimpleIconLink href={`/hr/employees/${row.id}`} className="border border-gray-600" title="Edit">
+                            can("Departments - Edit") ? 
+                                <SimpleIconLink href={`/extras/settings/positions/${row.id}`} className="border border-gray-600" title="Edit">
                                     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                     </svg>
@@ -135,8 +107,8 @@ const Page = () => {
                         }
 
                         {
-                            can("Employees - Delete") ? 
-                                <SimpleIconButton className="border border-gray-600" onClick={ () => handleDeletionPopup(row.user_id) } title="Delete">
+                            can("Departments - Delete") ? 
+                                <SimpleIconButton className="border border-gray-600" onClick={ () => handleDeletionPopup(row.id) } title="Delete">
                                     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                     </svg>
@@ -144,7 +116,6 @@ const Page = () => {
                                 :
                                 ""
                         }
-
                     </ButtonGroupH>
                 }
             },
@@ -155,15 +126,14 @@ const Page = () => {
                 return (
                     <div 
                         key={row.id} 
-                        className="w-full h-min p-4 bg-[#f5f5f5] rounded-[15px] flex flex-col items-start justify-start gap-2">
+                        className="w-full h-min p-4 bg-[#f5f5f5] rounded-[15px] flex flex-col gap-2">
                         <div
                             className="text-xs text-gray-700 font-extrabold w-full flex items-center justify-between gap-5">
                                 <span className="text-gray-400">ID: {row.id}</span>
                                 <ButtonGroupH>
-
                                     {
-                                        can("Employees - Edit") ? 
-                                            <SimpleIconLink href={`/hr/employees/${row.id}`} className="border border-gray-600" title="Edit">
+                                        can("Departments - Edit") ? 
+                                            <SimpleIconLink href={`/extras/settings/positions/${row.id}`} className="border border-gray-600" title="Edit">
                                                 <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                                 </svg>
@@ -173,8 +143,8 @@ const Page = () => {
                                     }
 
                                     {
-                                        can("Employees - Delete") ? 
-                                            <SimpleIconButton className="border border-gray-600" onClick={ () => handleDeletionPopup(row.user_id) } title="Delete">
+                                        can("Departments - Delete") ? 
+                                            <SimpleIconButton className="border border-gray-600" onClick={ () => handleDeletionPopup(row.id) } title="Delete">
                                                 <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                                 </svg>
@@ -182,44 +152,44 @@ const Page = () => {
                                             :
                                             ""
                                     }
-                                    
                                 </ButtonGroupH>
                         </div>
+                        <div
+                            className="w-full flex items-center justify-between gap-2">
+                                <span className="text-sm text-gray-600 font-extrabold capitalize">Title</span>
+                        </div>
+                        <div
+                            className="text-base text-[#202224] font-extrabold uppercase">
+                                { row.title }
+                        </div>
+                        
+                        <div
+                            className="w-full flex items-center justify-between gap-2">
+                                <span className="text-sm text-gray-600 font-extrabold capitalize">Name</span>
+                        </div>
+                        <div
+                            className="text-base text-[#202224] font-extrabold uppercase">
+                                { row.name }
+                        </div>
 
-                        <div className="w-full flex items-center justify-start gap-2 my-4">
-                            <Image src={row.avatar} width={72} height={72} className="rounded-full size-[72px] aspect-square" alt="profile photo" />
-                            <div className="flex flex-col">
-                                <div className="text-base text-[#202224] font-extrabold uppercase">
-                                        { row.name }
+                        <div className="flex flex-col gap-2 w-full mt-4">                            
+                            <div className="w-full h-[30px] bg-white rounded-[15px] flex items-center justify-start gap-2 font-semibold text-sm">
+                                <div className="rounded-[15px] bg-[#2BB592] text-white w-[132px] h-full flex items-center px-3">
+                                    Created At
                                 </div>
-                                <div className="text-base text-gray-500 font-light">
-                                        { row.position }
-                                </div>
-                                <div className="text-base text-gray-500 font-light">
-                                        { row.department }
+                                <div className="grow text-[#939393] h-full flex items-center px-1">
+                                    { row.created_at }
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="w-full flex flex-col gap-3">
-                            <span className="w-full px-4 py-1 border-2 border-[#2BB592] dark:border-gray-800 text-gray-600 text-base font-extrabold rounded-full">
-                                { row.phone_number }
-                            </span>
-                            <span className="w-full px-4 py-1 border-2 border-[#2BB592] dark:border-gray-800 text-gray-600 text-base font-extrabold rounded-full">
-                                { row.email }
-                            </span>
-                        </div>
-
-                        <div className="text-base text-gray-500 font-light mt-4">
-                                { row.notes }
-                        </div>
-
-                        <div className="w-full h-[1px] border-t-2 border-gray-200 dark:border-gray-700 my-4"></div>
-
-                        <div className="w-full flex items-center justify-end">
-                            <span className="w-max px-4 py-1 bg-[#2BB592] dark:bg-gray-800 text-white text-base font-extrabold rounded-full">
-                                <span className="">{ row.employment_type }</span>
-                            </span>
+                            
+                            <div className="w-full h-[30px] bg-white rounded-[15px] flex items-center justify-start gap-2 font-semibold text-sm">
+                                <div className="rounded-[15px] bg-[#2BB592] text-white w-[132px] h-full flex items-center px-3">
+                                    Updated At
+                                </div>
+                                <div className="grow text-[#939393] h-full flex items-center px-1">
+                                    { row.updated_at }
+                                </div>
+                            </div>
                         </div>
                     </div>
                 );
@@ -230,7 +200,7 @@ const Page = () => {
 
     return (
         <>
-            <title>YORK - Employees</title>
+            <title>YORK - Positions</title>
 
             <Card className="h-auto md:rounded-[15px] bg-transparent md:bg-white px-0 md:px-4 dark:bg-transparent md:dark:bg-gray-800" >
                 <DataTable tableConfig={tableConfig} ref={datatableRef} />
@@ -239,7 +209,7 @@ const Page = () => {
             <DeleteConfirmationModal 
                 isVisible={isModalVisible} 
                 resourceID={resourceID} 
-                remoteEndPoint='/api/employees/delete' 
+                remoteEndPoint='/api/positions/delete' 
                 onClose={closeModal}
                 datatableRef={datatableRef} />
         </>

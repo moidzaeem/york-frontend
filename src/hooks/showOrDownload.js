@@ -28,7 +28,7 @@ export const useShowOrDownload = () => {
     }
 
 
-    const showOrDownload = async (slug) => {
+    const showOrDownload = async (slug, isPDF, id) => {
 
         try {
             
@@ -37,10 +37,21 @@ export const useShowOrDownload = () => {
             // const response = await axios.get(url);
             // return response.data;
 
+            let testURL = `/api/export/${slug}`;
 
-            const response = await axios.get(`/api/export/${slug}`, {
+            // Only append the format if isPDF is true
+            if (isPDF) {
+                testURL += '?format=pdf';
+            }
+
+            if(isPDF && id){
+                testURL += `&id=${id}`;
+            }
+            
+            const response = await axios.get(testURL, {
                 responseType: 'blob',
             });
+            
 
             // Extract the file's mime type from the response headers if necessary
             const contentType = response.headers['content-type'] || 'application/octet-stream';

@@ -21,28 +21,23 @@ export const useSubmitData = (url) => {
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const notify = (data) => {
-
-        data.status == 201 ? 
-            toast.success(data.message, {
-                position: 'top-right',
-                autoClose: 1000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            }) 
-            :
-            toast.error(data.message, {
-                position: 'top-right',
-                autoClose: 1000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
-    }
+        const toastOptions = {
+            position: 'top-right',
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        };
+    
+        if (data.status === 200 || data.status === 201) {
+            toast.success(data.message, toastOptions);
+        } else {
+            toast.error(data.message, toastOptions);
+        }
+    };
+    
 
 
     const redirectBack = () => {

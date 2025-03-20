@@ -121,6 +121,8 @@ const Sidebar = ({ isOpen = true, isFixed = true, setSidebar = () => {}, ...prop
                                 { title: 'General', link: '/extras/settings/general', isActive: false, show: can("General Settings"), icon: null },
                                 { title: 'Departments', link: '/extras/settings/departments', isActive: false, show: can(["Departments - View", "Departments - Create", "Departments - Edit", "Departments - Delete"]), icon: null },
                                 { title: 'Users', link: '/extras/settings/users', isActive: false, show: can(["Users - View", "Users - Change Status", "Users - Change Role"]), icon: null },
+                                { title: 'Positions', link: '/extras/settings/positions', isActive: false, show: can(["Departments - View", "Departments - Create", "Departments - Edit", "Departments - Delete"]), icon: null },
+
                             ],
                         },
                         { title: 'Logs', link: '/extras/logs', isActive: false, show: can(["Logs - View", "Logs - Delete"]), icon: null },

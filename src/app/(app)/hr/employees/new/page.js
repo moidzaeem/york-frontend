@@ -22,10 +22,10 @@ import { useAccessControl } from '@/hooks/accessControl';
 
 const Page = () => {
 
-    const {isSubmitted, submitData} = useSubmitData('/api/employees/create');
-    const {dropdowns} = useFetchDropdownData("/api/dropdowns/employee");
+    const { isSubmitted, submitData } = useSubmitData('/api/employees/create');
+    const { dropdowns } = useFetchDropdownData("/api/dropdowns/employee");
     const router = useRouter();
-    const {permissions, can} = useAccessControl();
+    const { permissions, can } = useAccessControl();
 
     if (!can("Employees - Create")) {
         // navigate to 403 page.
@@ -56,6 +56,7 @@ const Page = () => {
             dob: "",
             notes: "",
             address: "",
+            password: "",
             permissions: [],
             files: []
         },
@@ -63,6 +64,9 @@ const Page = () => {
             name: Yup.string()
                 .min(3, 'Must be 3 characters or more')
                 .max(55, 'Must be 55 characters or less')
+                .required('Required'),
+            password: Yup.string()
+                .min(8, 'Must be 8 characters or more')
                 .required('Required'),
             position_id: Yup.number()
                 .required('Required')
@@ -139,7 +143,7 @@ const Page = () => {
             <title>YORK - Employees</title>
 
             <Card className="h-auto min-h-96 md:rounded-[15px] bg-white md:bg-white px-0 md:px-4 dark:bg-transparent md:dark:bg-gray-800" >
-                { breadcrumb }
+                {breadcrumb}
                 <div className="w-full flex flex-row gap-3 items-center justify-between px-4 my-8">
                     <div className="flex items-center justify-start gap-3 text-xl md:text-xl font-semibold">
                         <span className="size-[31px] rounded-full bg-[#f5f5f5] dark:bg-gray-900 inline-flex items-center justify-center">
@@ -163,7 +167,7 @@ const Page = () => {
                                     id="name"
                                     type="text"
                                     name="name"
-                                    value={ formik.values.name }
+                                    value={formik.values.name}
                                     placeholder="Name"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -183,7 +187,7 @@ const Page = () => {
                                 <Select
                                     id="position"
                                     name="position_id"
-                                    value={formik.values.position_id ? formik.values.position_id : 0 }
+                                    value={formik.values.position_id ? formik.values.position_id : 0}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -191,12 +195,12 @@ const Page = () => {
                                     <option value="_">select position</option>
                                     {
                                         dropdowns?.positions?.length ? dropdowns.positions.map(position => (
-                                            <option key={ position.id } value={ position.id }>{ position.title }</option>
+                                            <option key={position.id} value={position.id}>{position.title}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">positions not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">positions not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
@@ -212,7 +216,7 @@ const Page = () => {
                                 <Select
                                     id="department"
                                     name="department_id"
-                                    value={formik.values.department_id ? formik.values.department_id : 0 }
+                                    value={formik.values.department_id ? formik.values.department_id : 0}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -220,12 +224,12 @@ const Page = () => {
                                     <option value="_">select department</option>
                                     {
                                         dropdowns?.departments?.length ? dropdowns.departments.map(department => (
-                                            <option key={ department.id } value={ department.id }>{ department.name }</option>
+                                            <option key={department.id} value={department.id}>{department.name}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">departments not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">departments not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
@@ -242,7 +246,7 @@ const Page = () => {
                                     id="phone_number"
                                     type="text"
                                     name="phone_number"
-                                    value={ formik.values.phone_number }
+                                    value={formik.values.phone_number}
                                     placeholder="Phone Number"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -263,8 +267,29 @@ const Page = () => {
                                     id="email"
                                     type="text"
                                     name="email"
-                                    value={ formik.values.email }
+                                    value={formik.values.email}
                                     placeholder="Email"
+                                    className="block mt-1 w-full bg-[#f5f5f5]"
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+
+                            </div>
+                            {/* Form Group end */}
+
+                            {/* Form Group start */}
+                            <div className="">
+                                <Label htmlFor="password">
+                                    Password
+                                    <InputError message={formik.touched.password && formik.errors.password ? formik.errors.password : ''} />
+                                </Label>
+
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    name="password"
+                                    value={formik.values.password}
+                                    placeholder="Password"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -283,7 +308,7 @@ const Page = () => {
                                 <Select
                                     id="employment_type"
                                     name="employment_type"
-                                    value={formik.values.employment_type }
+                                    value={formik.values.employment_type}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -291,12 +316,12 @@ const Page = () => {
                                     <option value="_">select employment type</option>
                                     {
                                         dropdowns?.employment_types?.length ? dropdowns.employment_types.map(employmentType => (
-                                            <option key={ employmentType } value={ employmentType }>{ employmentType }</option>
+                                            <option key={employmentType} value={employmentType}>{employmentType}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">employment types not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">employment types not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
@@ -313,7 +338,7 @@ const Page = () => {
                                     id="dob"
                                     type="date"
                                     name="dob"
-                                    value={ formik.values.dob }
+                                    value={formik.values.dob}
                                     placeholder="Date of birth"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -334,7 +359,7 @@ const Page = () => {
                                     id="address"
                                     type="text"
                                     name="address"
-                                    value={ formik.values.address }
+                                    value={formik.values.address}
                                     placeholder="Address"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -351,13 +376,13 @@ const Page = () => {
                                     <InputError messages={formik.touched.files && formik.errors.files ? formik.errors.files : ''} className="mt-2" />
                                 </Label>
 
-                                <FileInput 
-                                    id="files" 
-                                    name="files" 
+                                <FileInput
+                                    id="files"
+                                    name="files"
                                     onChange={() => formik.setFieldValue("files", [...event.target.files])}
-                                    className="mt-1 !bg-[#080808] !text-white group cursor-pointer" 
+                                    className="mt-1 !bg-[#080808] !text-white group cursor-pointer"
                                     multiple={false}
-                                    >
+                                >
                                     <span>Upload Picture</span>
                                     <Camera className="stroke-slate-800  group-hover:stroke-slate-100" />
                                 </FileInput>
@@ -375,7 +400,7 @@ const Page = () => {
                                     id="notes"
                                     rows="8"
                                     name="notes"
-                                    value={ formik.values.notes }
+                                    value={formik.values.notes}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -394,7 +419,7 @@ const Page = () => {
                                 <Select
                                     id="role"
                                     name="role"
-                                    value={formik.values.role }
+                                    value={formik.values.role}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -402,17 +427,17 @@ const Page = () => {
                                     <option value="_">select role</option>
                                     {
                                         dropdowns?.roles?.length ? dropdowns.roles.map(role => (
-                                            <option key={ role.id } value={ role.name }>{ role.name }</option>
+                                            <option key={role.id} value={role.name}>{role.name}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">roles not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">roles not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 {
@@ -430,14 +455,14 @@ const Page = () => {
                                                 onChange={handleCheckboxChange}
                                                 checked={formik.values.permissions.includes(String(permission.name))}
                                                 onBlur={formik.handleBlur}
-                                                />
+                                            />
                                         </div>
                                     ))
-                                    : 
-                                    <>
-                                        <input type="hidden" name="permissions" value="" />
-                                        <span className="md:col-span-2">Permissions not found</span>
-                                    </>
+                                        :
+                                        <>
+                                            <input type="hidden" name="permissions" value="" />
+                                            <span className="md:col-span-2">Permissions not found</span>
+                                        </>
                                 }
                             </div>
                             {/* Form Group end */}

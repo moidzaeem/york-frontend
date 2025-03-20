@@ -1,6 +1,7 @@
 import Card from "../card/Card";
 import { useState } from "react";
 import JK_Calendar from "@/lib/calendar";
+import Link from 'next/link'
 
 const Calendar = ({ reloadDashboardData }) => {
 
@@ -66,6 +67,7 @@ const Calendar = ({ reloadDashboardData }) => {
                 <div className="grid grid-cols-7 gap-3 mt-4">
                     {
                         days.length && days.map((day, idx) => (
+                            <Link href="/calendar">
                             <span key={idx} className="flex items-center justify-center">
                                 <span 
                                     className={`
@@ -76,6 +78,7 @@ const Calendar = ({ reloadDashboardData }) => {
                                     { day.day }
                                 </span>
                             </span>
+                            </Link>
                         ))
                     }
                 </div>

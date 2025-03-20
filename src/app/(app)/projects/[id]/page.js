@@ -19,6 +19,7 @@ import SidebarProjects from '@/components/icons/SidebarProjects';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAccessControl } from '@/hooks/accessControl';
+import ReactSelect from 'react-select';
 
 
 const Page = ({ params }) => {
@@ -32,6 +33,11 @@ const Page = ({ params }) => {
         // navigate to 403 page.
         // router.push(process.env.NEXT_PUBLIC_UNAUTHORIZED_ROUTE);
     }
+
+    const userOptions = dropdowns?.users.map(user => ({
+        value: user.id,
+        label: user.name
+    })) || [];
 
     const SUPPORTED_FORMATS = [
         'image/jpg',
@@ -49,8 +55,10 @@ const Page = ({ params }) => {
     const { initialData } = useFetchResource("/api/projects", params.id);
 
     const formik = useFormik({
-        initialValues: initialData,
-        enableReinitialize: true,
+        initialValues: {
+            ...initialData,
+            assigned_to: initialData.assignee_ids ? initialData.assignee_ids : [], // Parse comma-separated string to array
+        }, enableReinitialize: true,
         validationSchema: Yup.object({
             project_name: Yup.string()
                 .min(3, 'Must be 3 characters or more')
@@ -108,6 +116,10 @@ const Page = ({ params }) => {
         </ul>
     )
 
+    const handleSelectChange = (selectedOptions) => {
+        const selectedValues = selectedOptions.map(option => option.value);
+        formik.setFieldValue('assigned_to', selectedValues);
+    };
     return (
         <>
             <title>YORK - Projects</title>
@@ -238,6 +250,30 @@ const Page = ({ params }) => {
                             </div>
                             {/* Form Group end */}
 
+
+  {/* Form Group start */}
+  <div className="">
+                                <Label htmlFor="assigned_to">
+                                    Assignee
+                                    <InputError message={formik.touched.assigned_to && formik.errors.assigned_to ? formik.errors.assigned_to : ''} />
+                                </Label>
+
+                                <ReactSelect
+                                    id="assigned_to"
+                                    name="assigned_to"
+                                    value={userOptions.filter(option => formik.values.assigned_to.includes(option.value))}
+                                    onChange={handleSelectChange}
+                                    options={userOptions}
+                                    isMulti
+                                    closeMenuOnSelect={false}
+                                    className="mt-2"
+                                    placeholder="Select assignees"
+                                />
+
+
+
+                            </div>
+                            {/* Form Group end */}
                             
                             {/* Form Group start */}
                             <div className="">

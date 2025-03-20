@@ -22,6 +22,7 @@ import * as Yup from 'yup';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAccessControl } from '@/hooks/accessControl';
+import ReactSelect from 'react-select';
 
 
 const Page = ({ params }) => {
@@ -49,10 +50,18 @@ const Page = ({ params }) => {
     ];
     const FILE_SIZE = 1024 * 1024 * 12; // 12MB
 
+    const userOptions = dropdowns?.users.map(user => ({
+        value: user.id,
+        label: user.name
+    })) || [];
+
     const { initialData } = useFetchResource("/api/installations", params.id);
 
     const formik = useFormik({
-        initialValues: initialData,
+        initialValues: {
+            ...initialData,
+            assigned_to: initialData.users ? initialData.users : [], // Parse comma-separated string to array
+        },
         enableReinitialize: true,
         validationSchema: Yup.object({
             project_id: Yup.number()
@@ -95,6 +104,11 @@ const Page = ({ params }) => {
         onSubmit: submitData
     });
 
+    
+    const handleSelectChange = (selectedOptions) => {
+        const selectedValues = selectedOptions.map(option => option.value);
+        formik.setFieldValue('assigned_to', selectedValues);
+    };
     const breadcrumb = (
         <ul className="flex items-center justify-start gap-3">
             <li className="capitalize text-base text-gray-800 font-bold hover:text-blue-500 hover:underline cursor-pointer" >
@@ -159,33 +173,29 @@ const Page = ({ params }) => {
                             </div>
                             {/* Form Group end */}
                             
-                            {/* Form Group start */}
-                            <div className="">
+ {/* Form Group start */}
+ <div className="">
                                 <Label htmlFor="assigned_to">
-                                    Assigned To
+                                    Assignee
                                     <InputError message={formik.touched.assigned_to && formik.errors.assigned_to ? formik.errors.assigned_to : ''} />
                                 </Label>
 
-                                <Select
+                                <ReactSelect
                                     id="assigned_to"
                                     name="assigned_to"
-                                    value={ formik.values.assigned_to }
-                                    className="block mt-1 w-full bg-[#f5f5f5]"
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                >
-                                    <option value="_">select assignee</option>
-                                    {
-                                        dropdowns?.users?.length ? dropdowns.users.map(assignee => (
-                                            <option key={ assignee.id } value={ assignee.id }>{ assignee.name }</option>
-                                        ))
-                                        :
-                                        (
-                                            <option value="_">assignees not found</option>
-                                        )
-                                    }
-                                </Select>
+                                    value={userOptions.filter(option => formik.values.assigned_to.includes(option.value))}
+                                    onChange={handleSelectChange}
+                                    options={userOptions}
+                                    isMulti
+                                    closeMenuOnSelect={false}
+                                    className="mt-2"
+                                    placeholder="Select assignees"
+                                />
+
+
+
                             </div>
+                            {/* Form Group end */}
                             {/* Form Group end */}
                             
                             {/* Form Group start */}

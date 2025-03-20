@@ -17,7 +17,8 @@ import CommentsModal from '@/components/modal/CommentsModal';
 import PhotosModal from '@/components/modal/PhotosModal';
 import { useRouter } from 'next/navigation';
 import { useAccessControl } from '@/hooks/accessControl';
-
+import { useContext } from 'react';
+import AuthContext from '@/lib/authContext';
 
 const Page = () => {
 
@@ -29,10 +30,11 @@ const Page = () => {
     const [isPhotosModalVisible, setIsPhotosModalVisible] = useState(false);
     const router = useRouter();
     const {permissions, can} = useAccessControl();
+    let user = useContext(AuthContext);
 
     if (!can(["Logistics - View", "Logistics - Create", "Logistics - Edit", "Logistics - Delete"])) {
         // navigate to 403 page.
-        router.push(process.env.NEXT_PUBLIC_UNAUTHORIZED_ROUTE);
+        // router.push(process.env.NEXT_PUBLIC_UNAUTHORIZED_ROUTE);
     }
 
     
@@ -211,14 +213,16 @@ const Page = () => {
                         }
 
                         {
-                            can("Logistics - Edit") ? 
+                           
+                           (row.assignee_ids.includes(user.id) || user.role_name.includes('Manager') || user.role_name === 'Administrator') && (
+
                                 <SimpleIconLink href={`/tools/logistics/${row.id}`} className="border border-gray-600" title="Edit">
                                     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                     </svg>
                                 </SimpleIconLink>
-                                :
-                                ""
+                                )
+                              
                         }
 
                         {

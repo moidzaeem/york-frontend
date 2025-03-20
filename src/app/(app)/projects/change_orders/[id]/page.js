@@ -17,14 +17,17 @@ import SidebarProjects from '@/components/icons/SidebarProjects';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAccessControl } from '@/hooks/accessControl';
-
+import { useShowOrDownload } from '@/hooks/showOrDownload';
+import BaseButton from '@/components/buttons/BaseButton';
+import Download from '@/components/icons/Download';
 
 const Page = ({ params }) => {
-    
-    const {isSubmitted, submitData} = useSubmitData('/api/change_order/update');
-    const {dropdowns} = useFetchDropdownData("/api/dropdowns/change_order");
+
+    const { isSubmitted, submitData } = useSubmitData('/api/change_order/update');
+    const { dropdowns } = useFetchDropdownData("/api/dropdowns/change_order");
     const router = useRouter();
-    const {permissions, can} = useAccessControl();
+    const { permissions, can } = useAccessControl();
+    const [exportToExcel, loadingStatus] = useShowOrDownload();
 
     if (!can(["ChangeOrders - View", "ChangeOrders - Edit"])) {
         // navigate to 403 page.
@@ -101,10 +104,15 @@ const Page = ({ params }) => {
                         </span>
                         Edit Change Order
                     </div>
+
+                    <BaseButton onClick={async () => { await exportToExcel("ChangeOrders", true, params.id) }} className="bg-white md:bg-[#f5f5f5] text-base md:text-base" >
+                        <Download className="fill-slate-500" />
+                        Download
+                    </BaseButton>
                 </div>
 
                 <div className="w-full px-4 mt-12">
-                    <form onSubmit={ can("ChangeOrders - Edit") ? formik.handleSubmit : () => false }>
+                    <form onSubmit={can("ChangeOrders - Edit") ? formik.handleSubmit : () => false}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-11 gap-y-6">
                             {/* Form Group start */}
                             <div className="">
@@ -116,7 +124,7 @@ const Page = ({ params }) => {
                                 <Select
                                     id="project_id"
                                     name="project_id"
-                                    value={ formik.values.project_id }
+                                    value={formik.values.project_id}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -125,12 +133,12 @@ const Page = ({ params }) => {
                                     <option value="_">select project</option>
                                     {
                                         dropdowns?.projects?.length ? dropdowns.projects.map(project => (
-                                            <option key={ project.id } value={ project.id }>{ project.project_name }</option>
+                                            <option key={project.id} value={project.id}>{project.project_name}</option>
                                         ))
-                                        :
-                                        (
-                                            <option value="_">projects not found</option>
-                                        )
+                                            :
+                                            (
+                                                <option value="_">projects not found</option>
+                                            )
                                     }
                                 </Select>
                             </div>
@@ -147,7 +155,7 @@ const Page = ({ params }) => {
                                     id="date"
                                     type="date"
                                     name="date"
-                                    value={ formik.values.date }
+                                    value={formik.values.date}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -166,7 +174,7 @@ const Page = ({ params }) => {
                                     id="floor"
                                     type="text"
                                     name="floor"
-                                    value={ formik.values.floor }
+                                    value={formik.values.floor}
                                     placeholder="Floor"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -186,7 +194,7 @@ const Page = ({ params }) => {
                                     id="unit_number"
                                     type="text"
                                     name="unit_number"
-                                    value={ formik.values.unit_number }
+                                    value={formik.values.unit_number}
                                     placeholder="Unit Number"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -206,7 +214,7 @@ const Page = ({ params }) => {
                                     id="description_of_change"
                                     rows="8"
                                     name="description_of_change"
-                                    value={ formik.values.description_of_change }
+                                    value={formik.values.description_of_change}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     placeholder="Write description..."
                                     onChange={formik.handleChange}
@@ -226,7 +234,7 @@ const Page = ({ params }) => {
                                     id="description_of_change_approval"
                                     rows="8"
                                     name="description_of_change_approval"
-                                    value={ formik.values.description_of_change_approval }
+                                    value={formik.values.description_of_change_approval}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     placeholder="Write description..."
                                     onChange={formik.handleChange}
@@ -246,7 +254,7 @@ const Page = ({ params }) => {
                                     id="reason_for_change"
                                     rows="8"
                                     name="reason_for_change"
-                                    value={ formik.values.reason_for_change }
+                                    value={formik.values.reason_for_change}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     placeholder="Write description..."
                                     onChange={formik.handleChange}
@@ -266,7 +274,7 @@ const Page = ({ params }) => {
                                     id="reason_for_change_approval"
                                     rows="8"
                                     name="reason_for_change_approval"
-                                    value={ formik.values.reason_for_change_approval }
+                                    value={formik.values.reason_for_change_approval}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     placeholder="Write description..."
                                     onChange={formik.handleChange}
@@ -286,7 +294,7 @@ const Page = ({ params }) => {
                                     id="additional_notes"
                                     rows="8"
                                     name="additional_notes"
-                                    value={ formik.values.additional_notes }
+                                    value={formik.values.additional_notes}
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     placeholder="Write description..."
                                     onChange={formik.handleChange}
@@ -294,7 +302,7 @@ const Page = ({ params }) => {
                                 />
                             </div>
                             {/* Form Group end */}
-                            
+
                             {/* Form Group start */}
                             <div className="md:col-span-2 flex items-center justify-start gap-4">
                                 <div>
@@ -309,10 +317,10 @@ const Page = ({ params }) => {
                                         className="mt-1 bg-[#f5f5f5]"
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        checked={ formik.values.fix_amount == 1 ? true : false }
-                                        />
+                                        checked={formik.values.fix_amount == 1 ? true : false}
+                                    />
                                 </div>
-                                
+
                                 <div>
                                     <Label htmlFor="hourly-rate">
                                         Hourly Rate
@@ -325,8 +333,8 @@ const Page = ({ params }) => {
                                         className="mt-1 bg-[#f5f5f5]"
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        checked={ formik.values.fix_amount == 0 ? true : false }
-                                        />
+                                        checked={formik.values.fix_amount == 0 ? true : false}
+                                    />
                                 </div>
                             </div>
                             {/* Form Group end */}
@@ -342,7 +350,7 @@ const Page = ({ params }) => {
                                     id="charge_amount"
                                     type="text"
                                     name="charge_amount"
-                                    value={ formik.values.charge_amount }
+                                    value={formik.values.charge_amount}
                                     placeholder="Charge Amount"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -364,7 +372,7 @@ const Page = ({ params }) => {
                                     id="york_signature"
                                     type="text"
                                     name="york_signature"
-                                    value={ formik.values.york_signature }
+                                    value={formik.values.york_signature}
                                     placeholder="York Hospitality (Signature)"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -384,7 +392,7 @@ const Page = ({ params }) => {
                                     id="client_signature"
                                     type="text"
                                     name="client_signature"
-                                    value={ formik.values.client_signature }
+                                    value={formik.values.client_signature}
                                     placeholder="Client (Signature)"
                                     className="block mt-1 w-full bg-[#f5f5f5]"
                                     onChange={formik.handleChange}
@@ -396,13 +404,13 @@ const Page = ({ params }) => {
                         </div>
 
                         {
-                            can("ChangeOrders - Edit") ? 
+                            can("ChangeOrders - Edit") ?
                                 <FormAction backUrl="/projects/change_orders" isSubmitted={isSubmitted} />
                                 :
                                 ""
                         }
-                        
-                        </form>
+
+                    </form>
                 </div>
             </Card>
         </>
