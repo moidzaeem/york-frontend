@@ -14,27 +14,30 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAccessControl } from "@/hooks/accessControl";
-
+import './GoogleCalendar.css'; // Assuming you create a separate CSS file for styles
 
 const GoogleCalendar = ({ calendarID }) => {
-    const encodedCalendarID = encodeURIComponent(calendarID); // Ensures the calendar ID is safely encoded
+    const encodedCalendarID = encodeURIComponent(calendarID);
+  
     return (
-      <div className="flex justify-center items-center">
-        <div className="text-center">
-          <h1>My Google Calendar</h1>
+      <div className="calendar-wrapper">
+        <h1>My Google Calendar</h1>
+        <div className="iframe-container">
           <iframe
             src={`https://calendar.google.com/calendar/embed?src=${encodedCalendarID}&ctz=America%2FNew_York`}
             style={{ border: 0 }}
             width="800"
             height="600"
             frameBorder="0"
-            scrolling="no"
             title="Google Calendar"
           ></iframe>
         </div>
       </div>
     );
   };
+  
+  
+  
   
 
 
