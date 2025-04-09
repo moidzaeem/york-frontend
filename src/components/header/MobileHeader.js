@@ -13,6 +13,7 @@ import Link from 'next/link'
 import Search2 from '../icons/Search2'
 import LogOut from '../icons/LogOut'
 import { useNotification } from '@/hooks/notification'
+import axios from '@/lib/axios'
 
 
 const MobileHeader = ({ className = "", isFixed = true, user, sidebarStateHandler, openSearch = () => {}, icon, children }) => {
@@ -20,6 +21,19 @@ const MobileHeader = ({ className = "", isFixed = true, user, sidebarStateHandle
     const { logout } = useAuth()
 
     const { notifications } = useNotification();
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            // Make the API call to mark all notifications as read
+            const response = await axios.patch('/api/notifications/mark-all-read');
+
+            if (response.status === 200) {
+
+            }
+        } catch (error) {
+            console.error('Error marking all notifications as read:', error);
+        }
+    };
 
     return (
         <nav className={`mx-5 py-2 rounded-full bg-white dark:bg-gray-800 border-b-[1px] border-white dark:border-gray-800 ${ className } ${
@@ -68,14 +82,14 @@ const MobileHeader = ({ className = "", isFixed = true, user, sidebarStateHandle
                                 align="right"
                                 width="w-[90vw] max-w-[400px]"
                                 trigger={
-                                    <button className="grow-0 shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full size-[40px] aspect-square flex items-center justify-center">
-                                        <Bell size="size-[20px]" fill="fill-gray-600 hover:fill-gray-800" />
+                                    <button className="grow-0 shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full size-[40px] aspect-square flex items-center justify-center" onClick={handleMarkAllAsRead}>
+                                        <Bell size="size-[20px]" fill="fill-gray-600 hover:fill-gray-800" isUnread={notifications?.unread} />
                                     </button>
                                 }>
                                 {/* Authentication */} 
 
                                 <div className="px-4 py-4 flex items-center justify-start gap-2">
-                                    <Bell size="size-[20px]" fill="fill-gray-600 hover:fill-gray-800" />
+                                    <Bell size="size-[20px]" fill="fill-gray-600 hover:fill-gray-800"  isUnread={notifications?.unread}/>
                                     <span className="font-bold text-lg">My Notifications</span>
                                 </div>
 
@@ -84,18 +98,19 @@ const MobileHeader = ({ className = "", isFixed = true, user, sidebarStateHandle
                                 <div className="mb-6"></div>
 
                                 {
-                                    notifications?.length ? notifications.map((item, idx) => (
-                                        <div key={ idx } className="text-sm leading-5 text-gray-700 px-4 py-1">
-                                            <div className="h-10 py-1 px-3 bg-[#1CA988] dark:bg-[#1CA988] !rounded-full flex items-center text-white dark:text-white font-normal text-base">
-                                                { item.message }
+                                    notifications?.data?.length ? notifications.data?.map((item, idx) => (
+                                        <div key={idx} className="text-sm leading-5 text-gray-700 px-4 py-1">
+                                            <div className={`h-10 py-1 px-3 ${notifications?.unread ? 'bg-[#1CA988]' : 'bg-gray-500'} dark:bg-[#1CA988] !rounded-full flex items-center text-white dark:text-white font-normal text-base`}>
+                                                {item.message}
                                             </div>
+
                                             {/* <NotificationItem notification="You have 1 new task" /> */}
                                         </div>
                                     ))
-                                    : 
-                                    (
-                                        <p className="leading-5 text-gray-700 text-base text-center">No Notificaitons</p>
-                                    )
+                                        :
+                                        (
+                                            <p className="leading-5 text-gray-700 text-base text-center">No Notificaitons</p>
+                                        )
                                 }
 
                                 <div className="mb-6"></div>
